@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
 
-apt-get install -y containerd
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+apt-get update
+apt-get install -y containerd.io
 
-mkdir /etc/containerd
+mkdir -p /etc/containerd
 containerd config default > /etc/containerd/config.toml
 systemctl restart containerd
-
-crictl config --set runtime-endpoint=unix:///run/containerd/containerd.sock --set image-endpoint=unix:///run/containerd/containerd.sock
+systemctl enable containerd
 
 echo -e "finished..."
