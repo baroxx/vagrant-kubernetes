@@ -4,7 +4,7 @@ set -e
 readonly USER_NAME=$1
 readonly KUBERNETES_VERSION=$2
 
-IP=$(ip addr show eth0 | grep -o "inet [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*") 
+IP=$(ip addr show enp0s3 | grep -o "inet [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*") 
 echo "$IP cp" >> /etc/hosts
 
 echo -e "apiVersion: kubeadm.k8s.io/v1beta3

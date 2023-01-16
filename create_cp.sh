@@ -1,3 +1,4 @@
 #!/bin/bash
 
-vagrant up --provider libvirt --provision-with main,containerd,kubernetes,control,calico,final
+# Choose crio or containerd
+vagrant up --provider virtualbox --provision-with main,crio,kubernetes,control,calico,final

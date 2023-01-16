@@ -5,14 +5,13 @@ readonly USER_NAME=$1
 readonly PASSWORD=$2
 readonly KEYMAP=$3    
 
-useradd -m -s /bin/bash $USER_NAME
 echo $USER_NAME:$PASSWORD | sudo chpasswd
 usermod -aG sudo $USER_NAME
 
 timedatectl set-timezone Europe/Berlin
 localectl set-x11-keymap $KEYMAP
 
-apt-get install -y curl apt-transport-https git wget gnupg2 software-properties-common ca-certificates uidmap bash-completion
+apt-get install -y curl apt-transport-https git wget software-properties-common ca-certificates bash-completion
 
 echo "source <(kubectl completion bash)" >> /home/$USER_NAME/.bashrc
 
