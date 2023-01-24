@@ -17,4 +17,4 @@ systemctl daemon-reload
 systemctl restart crio
 systemctl enable crio
 
-echo -e "finished..."
+echo -e "finished crio..."

@@ -11,4 +11,4 @@ systemctl enable --now kubelet
 apt-get install bash-completion -y
 echo "source <(kubectl completion bash)" >> /home/$USER_NAME/.bashrc
 
-echo -e "finished..."
+echo -e "finished kubernetes..."

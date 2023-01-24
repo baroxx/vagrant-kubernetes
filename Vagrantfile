@@ -1,6 +1,5 @@
-BOX = "ubuntu/focal64"
+BASE_BOX = "ubuntu/focal64"
 BOX_VERSION = "20230110.0.0"
-HOSTNAME = "ubuntu"
 CPUS = 2
 MEMORY = "4096"
 USER_NAME = "ubuntu"
@@ -8,40 +7,53 @@ PASSWORD = "ubuntu"
 KEYMAP = "de"
 
 KUBERNETES_VERSION="1.24.4"
-
-# worker config
-CP_IP="192.168.56."
-JOIN_TOKEN=""
-DISCOVERY_HASH="sha256:"
+CP_IP="192.168.56.10"
+POD_SUBNET_CIDR="192.168.0.0/16"
+NODE_IP_RANGE="192.168.56." # keep the last number empty
+NUMBER_OF_NODES = 1
 
 Vagrant.configure("2") do |config|
-    config.vm.box = BOX
-    config.vm.box_version = BOX_VERSION
-  
-    config.vm.hostname = HOSTNAME
 
-    config.vm.provider "virtualbox" do |vm|
-        vm.cpus = CPUS
-        vm.memory = MEMORY
+    config.vm.provider "virtualbox" do |virtualbox|
+        virtualbox.cpus = CPUS
+        virtualbox.memory = MEMORY
     end
 
-    config.vm.network "private_network", type: "dhcp"
+    config.vm.define "k8s-cp" do |cp|
+        cp.vm.box = BASE_BOX
+        config.vm.box_version = BOX_VERSION
 
-    config.vm.provision "main", type: "shell", args: [USER_NAME, PASSWORD, KEYMAP], run: "never", path: "provisioner/main.sh"
+        cp.vm.network "private_network", ip: CP_IP
+        cp.vm.hostname = "k8s-cp"
 
-    # Container runtime
-    config.vm.provision "crio", type: "shell", run: "never", path: "provisioner/crio.sh"
-    config.vm.provision "containerd", type: "shell", run: "never", path: "provisioner/containerd.sh"
+        cp.vm.provision "main", type: "shell", args: [USER_NAME, PASSWORD, KEYMAP], path: "provisioner/main.sh"
+        # Container runtime
+        cp.vm.provision "crio", type: "shell", path: "provisioner/crio.sh"
+        #cp.vm.provision "containerd", type: "shell", path: "provisioner/containerd.sh"
+        cp.vm.provision "kubernetes", type: "shell", args: [USER_NAME, KUBERNETES_VERSION], path: "provisioner/kubernetes.sh"
+        cp.vm.provision "control", type: "shell", args: [CP_IP, CP_IP, POD_SUBNET_CIDR, USER_NAME, KUBERNETES_VERSION], path: "provisioner/control.sh"
+        # CNI
+        cp.vm.provision "calico", type: "shell", path: "provisioner/calico.sh"
+        cp.vm.provision "final", type: "shell", args: [USER_NAME], path: "provisioner/final.sh"
+    end
 
-    config.vm.provision "kubernetes", type: "shell", args: [USER_NAME, KUBERNETES_VERSION], run: "never", path: "provisioner/kubernetes.sh"
+    (1..NUMBER_OF_NODES).each do |i|
+        config.vm.define "node-#{i}" do |node|
+            node.vm.box = BASE_BOX
+            config.vm.box_version = BOX_VERSION
 
-    # Node type
-    config.vm.provision "control", type: "shell", args: [USER_NAME, KUBERNETES_VERSION], run: "never", path: "provisioner/control.sh"
-    config.vm.provision "worker", type: "shell", args: [CP_IP, JOIN_TOKEN, DISCOVERY_HASH], run: "never", path: "provisioner/worker.sh"
+            node.vm.network "private_network", ip: NODE_IP_RANGE+"#{i + 10}"
+            node.vm.hostname = "node-#{i}"
 
-    # CNI
-    config.vm.provision "calico", type: "shell", run: "never", path: "provisioner/calico.sh"
+            node.vm.provision "main", type: "shell", args: [USER_NAME, PASSWORD, KEYMAP], path: "provisioner/main.sh"
+            # Container runtime
+            node.vm.provision "crio", type: "shell", path: "provisioner/crio.sh"
+            #node.vm.provision "containerd", type: "shell", path: "provisioner/containerd.sh"
+            node.vm.provision "kubernetes", type: "shell", args: [USER_NAME, KUBERNETES_VERSION], path: "provisioner/kubernetes.sh"
+            node.vm.provision "worker", type: "shell", args: [CP_IP, NODE_IP_RANGE+"#{i + 10}"], path: "provisioner/worker.sh"
+            node.vm.provision "final", type: "shell", args: [USER_NAME], path: "provisioner/final.sh"
+        end
+    end
 
-    config.vm.provision "final", type: "shell", args: [USER_NAME], run: "never", path: "provisioner/final.sh"
 end
   

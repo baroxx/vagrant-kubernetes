@@ -2,11 +2,11 @@
 set -e
 
 readonly CP_IP=$1
-readonly JOIN_TOKEN=$2
-readonly DISCOVERY_HASH=$3
+readonly NODE_IP=$2
 
+echo "KUBELET_EXTRA_ARGS=--node-ip=$NODE_IP" >> /etc/default/kubelet
+systemctl restart kubelet
 echo "$CP_IP cp" >> /etc/hosts
+/vagrant/provisioner/tmp/join.sh
 
-kubeadm join cp:6443 --token $JOIN_TOKEN --discovery-token-ca-cert-hash $DISCOVERY_HASH
-
-echo -e "finished..."
+echo -e "finished worker..."
