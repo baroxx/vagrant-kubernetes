@@ -1,22 +1,39 @@
 #!/bin/bash
 set -e
 
-readonly USER_NAME=$1
-readonly KUBERNETES_VERSION=$2
+readonly CP_IP=$1
+readonly NODE_IP=$2
+readonly POD_SUBNET_CIDR=$3
+readonly USER_NAME=$4
+readonly KUBERNETES_VERSION=$5
+readonly TMP_DIR="/vagrant/provisioner/tmp"
+readonly TMP_JOIN_SCRIPT="$TMP_DIR/join.sh"
+readonly TMP_KUBE_CONFIG="$TMP_DIR/config"
 
-IP=$(ip addr show enp0s3 | grep -o "inet [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*") 
-echo "$IP cp" >> /etc/hosts
+echo "KUBELET_EXTRA_ARGS=--node-ip=$NODE_IP" >> /etc/default/kubelet
+systemctl restart kubelet
+echo "$CP_IP cp" >> /etc/hosts
 
 echo -e "apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: \"$NODE_IP\"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 kubernetesVersion: $KUBERNETES_VERSION
-controlPlaneEndpoint: \"cp:6443\"
+controlPlaneEndpoint: \"$CP_IP:6443\"
 networking:
-  podSubnet: 192.168.0.0/16" >> /home/$USER_NAME/kubeadm-config.yaml
+  podSubnet: $POD_SUBNET_CIDR" >> /home/$USER_NAME/kubeadm-config.yaml
 
 kubeadm init --config=/home/$USER_NAME/kubeadm-config.yaml --upload-certs | tee kubeadm-init.out
 
 mkdir /home/$USER_NAME/.kube
-cp -i /etc/kubernetes/admin.conf /home/$USER_NAME/.kube/config
+cp /etc/kubernetes/admin.conf /home/$USER_NAME/.kube/config
+cp -f /etc/kubernetes/admin.conf $TMP_KUBE_CONFIG
 
-echo -e "finished..."
+rm -f $TMP_JOIN_SCRIPT
+kubeadm token create --print-join-command >> $TMP_JOIN_SCRIPT
+chmod u+x $TMP_JOIN_SCRIPT
+
+echo -e "finished control..."

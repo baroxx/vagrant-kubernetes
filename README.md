@@ -1,6 +1,6 @@
 # Kubernetes on Ubuntu 20.04 with Vagrant
 
-This project provides a basic setup of a Kubernetes node with Vagrant. Each virtual machine needs its own directory for Vagrant. You can clone this repository multipe times to configure a controle plane with worker nodes. Vagrant creates for each virtual machine a .vagrant directory. **Delete the .vagrant directory after copying an existing Vagrant setup.**
+This project provides a basic setup of a Kubernetes nodes with Vagrant.
 
 # Prerequisits
 
@@ -9,38 +9,31 @@ This project provides a basic setup of a Kubernetes node with Vagrant. Each virt
 
 # Configuration
 
-You can change these properties:
+You can change these properties in [Vagrantfile](Vagrantfile):
 
-- HOSTNAME = "ubuntu" <- must be unique in the cluster
 - CPUS = 2
 - MEMORY = "4096"
 - USER_NAME = "ubuntu"
 - PASSWORD = "ubuntu"
 - KEYMAP = "de"
+- KUBERNETES_VERSION="1.24.4"
+- CP_IP="192.168.50.10"
+- POD_SUBNET_CIDR="192.168.0.0/16"
+- NODE_IP_RANGE="192.168.50." # keep the last number empty
+- NUMBER_OF_NODES = 1
 
-## Container runtime
+# Container runtime
 
-There are provisioners for CRI-O (crio) and containerd. Choose **one** in [create_cp.sh](create_cp.sh) and [create_worker.sh](create_wn.sh).
+There are provisioners for CRI-O (crio) and containerd. CRI-O is used in the default setup. Choose **one** of the provisioners in [Vagrantfile](Vagrantfile) in the cp and node config. The container runtime must be the same for each node in the cluster.
 
-## Control Plane
+# Create Cluster
 
-1. Set KUBERNETES_VERSION in [Vagrantfile](Vagrantfile)
-2. Adjust [create_cp.sh](create_cp.sh)
-3. Run [create_cp.sh](create_cp.sh)
+The creation of the cluster is as simple as executing [run.sh](run.sh).
 
-## Worker Node
+# Access Cluster
 
-1. Set properties KUBERNETES_VERSION, CP_IP and JOIN_TOKEN in [Vagrantfile](Vagrantfile) (you can get the control plane IP, the join token and the discovery hash from the control plane)
-2. Adjust [create_worker.sh](create_wn.sh)
-3. Run [create_worker.sh](create_wn.sh)
+You can find the configuration for kubectl in [provisioner/tmp/config](provisioner/tmp/config) after the provisioning the cluster is done.
 
 # Provider
 
-This project is tested with VirtualBox. It should be possible to use the setup with VirtualBox as well. Change the provider config to something like that:
-
-```
-    config.vm.provider "virtualbox" do |vm|
-        vm.cpus = CPUS
-        vm.memory = MEMORY
-    end
-```
+This project is tested with VirtualBox. It should be possible to use the setup with other providers as well.

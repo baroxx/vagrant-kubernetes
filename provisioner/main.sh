@@ -34,10 +34,7 @@ sysctl --system
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-# /etc/apt/sources.list.d/kubernetes.list
-
 echo -e "deb  http://apt.kubernetes.io/  kubernetes-xenial  main" >> /etc/apt/sources.list.d/kubernetes.list
-
 apt-get update
 
-echo -e "finished..."
+echo -e "finished main..."

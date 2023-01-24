@@ -11,4 +11,4 @@ containerd config default > /etc/containerd/config.toml
 systemctl restart containerd
 systemctl enable containerd
 
-echo -e "finished..."
+echo -e "finished containerd..."
