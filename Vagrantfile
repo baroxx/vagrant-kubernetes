@@ -6,7 +6,7 @@ USER_NAME = "ubuntu"
 PASSWORD = "ubuntu"
 KEYMAP = "de"
 
-KUBERNETES_VERSION="1.24.4"
+KUBERNETES_VERSION="1.26.2"
 CP_IP="192.168.56.10"
 POD_SUBNET_CIDR="192.168.0.0/16"
 NODE_IP_RANGE="192.168.56." # keep the last number empty
@@ -14,14 +14,15 @@ NUMBER_OF_NODES = 1
 
 Vagrant.configure("2") do |config|
 
-    config.vm.provider "virtualbox" do |virtualbox|
-        virtualbox.cpus = CPUS
-        virtualbox.memory = MEMORY
-    end
-
     config.vm.define "k8s-cp" do |cp|
         cp.vm.box = BASE_BOX
-        config.vm.box_version = BOX_VERSION
+        cp.vm.box_version = BOX_VERSION
+
+        cp.vm.provider "virtualbox" do |virtualbox|
+            virtualbox.name = "k8s-cp"
+            virtualbox.cpus = CPUS
+            virtualbox.memory = MEMORY
+        end
 
         cp.vm.network "private_network", ip: CP_IP
         cp.vm.hostname = "k8s-cp"
@@ -40,7 +41,13 @@ Vagrant.configure("2") do |config|
     (1..NUMBER_OF_NODES).each do |i|
         config.vm.define "node-#{i}" do |node|
             node.vm.box = BASE_BOX
-            config.vm.box_version = BOX_VERSION
+            node.vm.box_version = BOX_VERSION
+
+            node.vm.provider "virtualbox" do |vbnodes|
+                vbnodes.name = "k8s-node-#{i}"
+                vbnodes.cpus = CPUS
+                vbnodes.memory = MEMORY
+            end
 
             node.vm.network "private_network", ip: NODE_IP_RANGE+"#{i + 10}"
             node.vm.hostname = "node-#{i}"
