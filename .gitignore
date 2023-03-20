@@ -1,3 +1,2 @@
 .vagrant
-provisioner/tmp/join.sh
-provisioner/tmp/config
+provisioner/tmp/*

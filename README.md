@@ -16,7 +16,8 @@ You can change these properties in [Vagrantfile](Vagrantfile):
 - USER_NAME = "ubuntu"
 - PASSWORD = "ubuntu"
 - KEYMAP = "de"
-- KUBERNETES_VERSION="1.24.4"
+- KUBERNETES_VERSION="1.26.2"
+- KUBERNETES_DASHBOARD_VERSION="2.7.0"
 - CP_IP="192.168.50.10"
 - POD_SUBNET_CIDR="192.168.0.0/16"
 - NODE_IP_RANGE="192.168.50." # keep the last number empty
@@ -32,7 +33,17 @@ The creation of the cluster is as simple as executing [run.sh](run.sh).
 
 # Access Cluster
 
+There are two ways to access the cluster: via kubectl or with the Kubernetes dashboard
+
+## kubectl
+
 You can find the configuration for kubectl in [provisioner/tmp/config](provisioner/tmp/config) after the provisioning the cluster is done.
+
+## Kubernetes Dashboard
+
+You can find the token for the Kubernetes Dashboard in [provisioner/tmp/admin-token.txt](provisioner/tmp/admin-token.txt) after the provisioning the cluster is done.
+
+To generate a new token just run: `kubectl -n kubernetes-dashboard create token admin-user`
 
 # Provider
 

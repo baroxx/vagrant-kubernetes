@@ -7,6 +7,7 @@ PASSWORD = "ubuntu"
 KEYMAP = "de"
 
 KUBERNETES_VERSION="1.26.2"
+KUBERNETES_DASHBOARD_VERSION="2.7.0"
 CP_IP="192.168.56.10"
 POD_SUBNET_CIDR="192.168.0.0/16"
 NODE_IP_RANGE="192.168.56." # keep the last number empty
@@ -35,6 +36,8 @@ Vagrant.configure("2") do |config|
         cp.vm.provision "control", type: "shell", args: [CP_IP, CP_IP, POD_SUBNET_CIDR, USER_NAME, KUBERNETES_VERSION], path: "provisioner/control.sh"
         # CNI
         cp.vm.provision "calico", type: "shell", path: "provisioner/calico.sh"
+        # Dashboards
+        cp.vm.provision "kubernetes-dashboard", type: "shell", args: [KUBERNETES_DASHBOARD_VERSION], path: "provisioner/kubernetes-dashboard.sh"
         cp.vm.provision "final", type: "shell", args: [USER_NAME], path: "provisioner/final.sh"
     end
 
