@@ -6,6 +6,7 @@ USER_NAME = "ubuntu"
 PASSWORD = "ubuntu"
 KEYMAP = "de"
 
+CP_HOSTNAME="k8s-cp"
 KUBERNETES_VERSION="1.26.2"
 KUBERNETES_DASHBOARD_VERSION="2.7.0"
 CP_IP="192.168.56.10"
@@ -20,20 +21,20 @@ Vagrant.configure("2") do |config|
         cp.vm.box_version = BOX_VERSION
 
         cp.vm.provider "virtualbox" do |virtualbox|
-            virtualbox.name = "k8s-cp"
+            virtualbox.name = CP_HOSTNAME
             virtualbox.cpus = CPUS
             virtualbox.memory = MEMORY
         end
 
         cp.vm.network "private_network", ip: CP_IP
-        cp.vm.hostname = "k8s-cp"
+        cp.vm.hostname = CP_HOSTNAME
 
         cp.vm.provision "main", type: "shell", args: [USER_NAME, PASSWORD, KEYMAP], path: "provisioner/main.sh"
         # Container runtime
         cp.vm.provision "crio", type: "shell", path: "provisioner/crio.sh"
         #cp.vm.provision "containerd", type: "shell", path: "provisioner/containerd.sh"
         cp.vm.provision "kubernetes", type: "shell", args: [USER_NAME, KUBERNETES_VERSION], path: "provisioner/kubernetes.sh"
-        cp.vm.provision "control", type: "shell", args: [CP_IP, CP_IP, POD_SUBNET_CIDR, USER_NAME, KUBERNETES_VERSION], path: "provisioner/control.sh"
+        cp.vm.provision "control", type: "shell", args: [CP_HOSTNAME, CP_IP, CP_IP, POD_SUBNET_CIDR, USER_NAME, KUBERNETES_VERSION], path: "provisioner/control.sh"
         # CNI
         cp.vm.provision "calico", type: "shell", path: "provisioner/calico.sh"
         # Dashboards
@@ -60,7 +61,7 @@ Vagrant.configure("2") do |config|
             node.vm.provision "crio", type: "shell", path: "provisioner/crio.sh"
             #node.vm.provision "containerd", type: "shell", path: "provisioner/containerd.sh"
             node.vm.provision "kubernetes", type: "shell", args: [USER_NAME, KUBERNETES_VERSION], path: "provisioner/kubernetes.sh"
-            node.vm.provision "worker", type: "shell", args: [CP_IP, NODE_IP_RANGE+"#{i + 10}"], path: "provisioner/worker.sh"
+            node.vm.provision "worker", type: "shell", args: [CP_HOSTNAME, CP_IP, NODE_IP_RANGE+"#{i + 10}"], path: "provisioner/worker.sh"
             node.vm.provision "final", type: "shell", args: [USER_NAME], path: "provisioner/final.sh"
         end
     end

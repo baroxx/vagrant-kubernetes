@@ -1,18 +1,19 @@
 #!/bin/bash
 set -e
 
-readonly CP_IP=$1
-readonly NODE_IP=$2
-readonly POD_SUBNET_CIDR=$3
-readonly USER_NAME=$4
-readonly KUBERNETES_VERSION=$5
+readonly CP_HOSTNAME=$1
+readonly CP_IP=$2
+readonly NODE_IP=$3
+readonly POD_SUBNET_CIDR=$4
+readonly USER_NAME=$5
+readonly KUBERNETES_VERSION=$6
 readonly TMP_DIR="/vagrant/provisioner/tmp"
 readonly TMP_JOIN_SCRIPT="$TMP_DIR/join.sh"
 readonly TMP_KUBE_CONFIG="$TMP_DIR/config"
 
 echo "KUBELET_EXTRA_ARGS=--node-ip=$NODE_IP" >> /etc/default/kubelet
 systemctl restart kubelet
-echo "$CP_IP cp" >> /etc/hosts
+echo "$CP_IP $CP_HOSTNAME" >> /etc/hosts
 
 echo -e "apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
