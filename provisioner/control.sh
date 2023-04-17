@@ -20,6 +20,10 @@ kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: \"$NODE_IP\"
 ---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+serverTLSBootstrap: true
+---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 kubernetesVersion: $KUBERNETES_VERSION

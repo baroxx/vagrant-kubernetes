@@ -45,6 +45,12 @@ You can find the token for the Kubernetes Dashboard in [provisioner/tmp/admin-to
 
 To generate a new token just run: `kubectl -n kubernetes-dashboard create token admin-user`
 
+# Monitoring
+
+- monitoring server
+- prometheus operator
+- kube prometheus
+
 # Provider
 
 This project is tested with VirtualBox. It should be possible to use the setup with other providers as well.
